@@ -31,6 +31,84 @@ let books = [
     'PUT /api/books/:id': 'Update a book',
     'DELETE /api/books/:id': 'Delete a book'
 */
+const express = require('express');
+const app = express();
+const port = 3000;
+
+// Middleware to parse JSON requests
+app.use(express.json());
+
+// (Your books array should already be above, per the starter repo)
+// GET /api/books - Retrieve all books
+app.get('/api/books', (req, res) => {
+  res.json(books);
+});
+
+// GET /api/books/:id - Retrieve a specific book by ID
+app.get('/api/books/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const book = books.find(b => b.id === id);
+
+  if (!book) {
+    return res.status(404).json({ error: 'Book not found' });
+  }
+
+  res.json(book);
+});
+// POST /api/books - Add a new book
+app.post('/api/books', (req, res) => {
+  const { title, author, genre, copiesAvailable } = req.body;
+
+  const newBook = {
+    id: books.length + 1,
+    title,
+    author,
+    genre,
+    copiesAvailable
+  };
+
+  books.push(newBook);
+  res.status(201).json(newBook);
+});
+// PUT /api/books/:id - Update an existing book
+app.put('/api/books/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const book = books.find(b => b.id === id);
+
+  if (!book) {
+    return res.status(404).json({ error: 'Book not found' });
+  }
+
+  const { title, author, genre, copiesAvailable } = req.body;
+
+  if (title !== undefined) book.title = title;
+  if (author !== undefined) book.author = author;
+  if (genre !== undefined) book.genre = genre;
+  if (copiesAvailable !== undefined) book.copiesAvailable = copiesAvailable;
+
+  res.json(book);
+});
+// DELETE /api/books/:id - Remove a book
+app.delete('/api/books/:id', (req, res) => {
+  const id = parseInt(req.params.id);
+  const index = books.findIndex(b => b.id === id);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Book not found' });
+  }
+
+  const deleted = books.splice(index, 1)[0];
+  res.json(deleted);
+});
+
+// Only start server when running directly, not when testing
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Books API server running at http://localhost:${port}`);
+  });
+}
+
+module.exports = app;
 
 
 
